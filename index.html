@@ -1878,7 +1878,8 @@ window.archiveSelected = function() {
     const archiveEntry = {
       name: it.name,
       category: it.category,
-      type: it.type || 'wish',
+      type: it.type,
+      price: it.price !== undefined ? it.price : null,
       owner: it.owner,
       archivedAt: Date.now()
     };
@@ -2017,7 +2018,8 @@ function doSaveItem() {
 // ---- SWIPE IN ARCHIVE ----
 function initSwipeListeners() {
   document.querySelectorAll('.archive-item[data-id]').forEach(el => {
-    let startX = 0, startY = 0, currentX = 0, isSwiping = false, confirmed = false;
+    let startX = 0, startY = 0, currentX = 0, isSwiping = false;
+    let confirmed = false;
     const id = el.getAttribute('data-id');
     const wrap = document.getElementById('awrap-' + id);
     const restoreBg = wrap.querySelector('.swipe-bg.restore');
@@ -2028,7 +2030,8 @@ function initSwipeListeners() {
     el.addEventListener('touchstart', e => {
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
-      currentX = 0; confirmed = false;
+      currentX = 0;
+      // don't reset confirmed here - it persists between touches
       el.classList.add('swiping');
     }, { passive: true });
 
@@ -2067,15 +2070,17 @@ function initSwipeListeners() {
         el.style.transform = 'translateX(-120%)';
         setTimeout(() => restoreFromArchive(id), 300);
       } else if (currentX > CONFIRM_THRESHOLD) {
-        // fly out right = delete - first half confirm
+        // fly out right = delete - two stage
         if (!confirmed) {
           confirmed = true;
+          el.dataset.deleteConfirm = '1';
           el.classList.add('snap-back');
-          el.style.transform = 'translateX(60px)';
+          el.style.transform = 'translateX(55px)';
           setTimeout(() => {
+            el.classList.remove('snap-back');
             el.style.transform = 'translateX(0)';
             showToast('החלק שוב למחיקה סופית', 'error');
-          }, 300);
+          }, 350);
         } else {
           el.classList.add('fly-out');
           el.style.transform = 'translateX(120%)';
@@ -2097,9 +2102,9 @@ function restoreFromArchive(id) {
   const restoredItem = {
     name: it.name,
     category: it.category,
-    type: it.type || 'wish',
-    owner: it.owner || currentUser,
-    price: null,
+    type: it.type,
+    owner: it.owner,
+    price: it.price !== undefined ? it.price : null,
     bought: false,
     createdAt: Date.now()
   };
