@@ -1872,9 +1872,10 @@ function listenArchive() {
 
 window.archiveSelected = function() {
   if (selectedIds.size === 0) return;
-  selectedIds.forEach(id => {
-    const it = items[id];
-    if (!it) return;
+  // snapshot ids and items before clearing
+  const toArchive = Array.from(selectedIds).map(id => ({ id, item: items[id] })).filter(x => x.item);
+  if (toArchive.length === 0) return;
+  toArchive.forEach(({ id, item: it }) => {
     const archiveEntry = {
       name: it.name,
       category: it.category,
@@ -1886,9 +1887,8 @@ window.archiveSelected = function() {
     set(ref(db, 'archive/' + id), archiveEntry);
     remove(ref(db, 'items/' + id));
   });
-  const count = selectedIds.size;
   clearSelection();
-  showToast(count + ' פריטים הועברו לארכיון', 'success');
+  showToast(toArchive.length + ' פריטים הועברו לארכיון', 'success');
 };
 
 window.openArchive = function() {
@@ -2097,20 +2097,27 @@ function initSwipeListeners() {
 }
 
 function restoreFromArchive(id) {
-  const it = archiveItems[id];
-  if (!it) return;
-  const restoredItem = {
-    name: it.name,
-    category: it.category,
-    type: it.type,
-    owner: it.owner,
-    price: it.price !== undefined ? it.price : null,
-    bought: false,
-    createdAt: Date.now()
-  };
-  set(ref(db, 'items/' + id), restoredItem);
-  remove(ref(db, 'archive/' + id));
-  showToast(it.name + ' חזר לרשימה', 'success');
+  // read directly from Firebase in case local cache is stale
+  const dbRef = ref(db, 'archive/' + id);
+  onValue(dbRef, snap => {
+    const it = snap.val();
+    if (!it) {
+      showToast('לא נמצא פריט', 'error');
+      return;
+    }
+    const restoredItem = {
+      name: it.name,
+      category: it.category || 'other',
+      type: it.type || 'wish',
+      owner: it.owner || currentUser,
+      price: (it.price !== undefined && it.price !== null) ? it.price : null,
+      bought: false,
+      createdAt: Date.now()
+    };
+    set(ref(db, 'items/' + id), restoredItem);
+    remove(ref(db, 'archive/' + id));
+    showToast((it.name || 'פריט') + ' חזר לרשימה', 'success');
+  }, { onlyOnce: true });
 }
 
 function deleteFromArchive(id) {
