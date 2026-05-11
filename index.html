@@ -14,8 +14,8 @@
      העלה את התמונה לשרת וקבל קישור ישיר, לדוגמה:
      https://your-server.com/icon.png
      ============================================ -->
-<link rel="apple-touch-icon" id="pwa-icon" href="https://i.postimg.cc/vmPVQHT2/IMG-0049.png">
-<link rel="icon" type="image/png" id="favicon-icon" href="https://i.postimg.cc/vmPVQHT2/IMG-0049.png">
+<link rel="apple-touch-icon" id="pwa-icon" href="<!-- הכנס כאן קישור לתמונה שלך -->">
+<link rel="icon" type="image/png" id="favicon-icon" href="<!-- הכנס כאן קישור לתמונה שלך -->">
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D7%91%D7%99%D7%AA%20%D7%A8%D7%95%D7%95%D7%A7%D7%99%D7%9D%22%2C%22short_name%22%3A%22%D7%91%D7%99%D7%AA%22%2C%22theme_color%22%3A%22%230a0a0f%22%2C%22background_color%22%3A%22%230a0a0f%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%7D">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -765,6 +765,238 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.error { border-color: rgba(255,107,107,0.4); background: rgba(255,107,107,0.1); color: var(--urgent); }
   .toast.success { border-color: rgba(0,212,170,0.4); background: rgba(0,212,170,0.1); color: var(--accent); }
+
+  /* MULTI SELECT */
+  .item-card.selected-for-action {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+  .item-select-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s; background: transparent;
+    cursor: pointer;
+  }
+  .item-card.selected-for-action .item-select-dot {
+    background: var(--accent); border-color: var(--accent);
+  }
+
+  /* ACTION BAR (appears when items selected) */
+  .action-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px 32px;
+    display: flex; gap: 10px; align-items: center;
+    z-index: 150;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+  }
+  .action-bar.show { transform: translateY(0); }
+  .action-bar-count {
+    font-size: 13px; font-weight: 700; color: var(--text2);
+    flex: 1;
+  }
+  .action-bar-btn {
+    padding: 11px 20px;
+    border-radius: 50px; border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .action-bar-btn.archive {
+    background: var(--accent); color: #000;
+    box-shadow: 0 4px 16px rgba(0,212,170,0.3);
+  }
+  .action-bar-btn.cancel-sel {
+    background: var(--card); color: var(--text2);
+  }
+  .action-bar-btn:active { transform: scale(0.95); }
+
+  /* ARCHIVE SCREEN */
+  #archive-screen {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+  }
+  .archive-header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .archive-back-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  }
+  .archive-back-btn:active { transform: scale(0.92); }
+  .archive-title { font-size: 18px; font-weight: 800; flex: 1; }
+  .archive-count-badge {
+    background: var(--accent-glow); color: var(--accent);
+    border: 1px solid rgba(0,212,170,0.3);
+    border-radius: 50px; padding: 4px 12px;
+    font-size: 12px; font-weight: 700;
+  }
+
+  .archive-list { flex: 1; overflow-y: auto; padding: 16px 16px 40px; }
+  .archive-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .archive-item-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .archive-item-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .archive-item-owner { font-size: 11px; color: var(--text3); }
+  .archive-item-date { font-size: 11px; color: var(--text3); }
+
+  /* ARCHIVE FAB button in topbar */
+  .archive-access-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    position: relative;
+  }
+  .archive-access-btn:active { transform: scale(0.92); }
+  .archive-badge {
+    position: absolute; top: -4px; right: -4px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); color: #000;
+    font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    display: none;
+  }
+  .archive-badge.show { display: flex; }
+
+  /* DUPLICATE WARNING DIALOG */
+  .dup-dialog {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(6px);
+    z-index: 700;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding: 0;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .dup-dialog.show { opacity: 1; pointer-events: all; }
+  .dup-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+  }
+  .dup-dialog.show .dup-box { transform: translateY(0); }
+  .dup-handle { width: 40px; height: 4px; background: var(--border); border-radius: 4px; margin: 0 auto 20px; }
+  .dup-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+  .dup-body { font-size: 14px; color: var(--text2); margin-bottom: 16px; line-height: 1.6; }
+  .dup-existing {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .dup-existing-name { font-size: 15px; font-weight: 700; flex: 1; }
+  .dup-existing-owner { font-size: 11px; color: var(--text3); }
+  .dup-actions { display: flex; gap: 10px; }
+  .dup-btn {
+    flex: 1; padding: 14px;
+    border-radius: 50px; border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .dup-btn.cancel { background: var(--card); color: var(--text2); }
+  .dup-btn.add-anyway { background: var(--wish); color: #fff; }
+  .dup-btn:active { transform: scale(0.96); }
+
+  /* SELECT ALL BAR */
+  .select-all-bar {
+    display: none;
+    justify-content: flex-end;
+    padding: 0 16px 8px;
+    flex-shrink: 0;
+  }
+  .select-all-bar.show { display: flex; }
+  .select-all-btn {
+    background: var(--card); border: 1px solid var(--accent);
+    border-radius: 50px; padding: 6px 14px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+  }
+  .select-all-btn:active { transform: scale(0.94); }
+
+  /* DELETE BTN in action bar */
+  .action-bar-btn.delete-sel {
+    background: rgba(255,107,107,0.15);
+    color: var(--urgent);
+    border: 1px solid rgba(255,107,107,0.3);
+  }
+
+  /* ARCHIVE SWIPE */
+  .archive-item-wrap {
+    position: relative; overflow: hidden;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .swipe-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center;
+    border-radius: var(--radius-sm);
+    transition: opacity 0.15s;
+    opacity: 0;
+  }
+  .swipe-bg.restore {
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+    justify-content: flex-end;
+    padding-right: 20px;
+  }
+  .swipe-bg.delete {
+    background: linear-gradient(90deg, var(--urgent) 0%, #ff4444 100%);
+    justify-content: flex-start;
+    padding-left: 20px;
+  }
+  .swipe-bg-label {
+    font-size: 13px; font-weight: 800; color: #fff;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .archive-item-wrap .archive-item {
+    position: relative; z-index: 1;
+    margin-bottom: 0;
+    transition: transform 0.0s;
+    touch-action: pan-y;
+    will-change: transform;
+    background: var(--card);
+  }
+  .archive-item-wrap .archive-item.swiping {
+    transition: none;
+  }
+  .archive-item-wrap .archive-item.snap-back {
+    transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+  }
+  .archive-item-wrap .archive-item.fly-out {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
 </style>
 </head>
 <body>
@@ -875,14 +1107,24 @@
           <span class="badge-online-dot"></span>חי
         </span>
       </div>
-      <div class="users-strip">
-        <div class="user-chip natan" id="chip-natan">
-          <div class="user-dot"></div>
-          <span class="user-chip-name">נתן</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="archive-access-btn" onclick="openArchive()" title="ארכיון">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="1" y="3" width="16" height="3.5" rx="1.5" stroke="#9898aa" stroke-width="1.4"/>
+            <path d="M2.5 6.5 L2.5 14.5 Q2.5 15.5 3.5 15.5 L14.5 15.5 Q15.5 15.5 15.5 14.5 L15.5 6.5" stroke="#9898aa" stroke-width="1.4"/>
+            <path d="M6.5 10.5 L9 13 L11.5 10.5" stroke="#9898aa" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="archive-badge" id="archive-badge"></div>
         </div>
-        <div class="user-chip menachem" id="chip-menachem">
-          <div class="user-dot"></div>
-          <span class="user-chip-name">מנחם</span>
+        <div class="users-strip">
+          <div class="user-chip natan" id="chip-natan">
+            <div class="user-dot"></div>
+            <span class="user-chip-name">נתן</span>
+          </div>
+          <div class="user-chip menachem" id="chip-menachem">
+            <div class="user-dot"></div>
+            <span class="user-chip-name">מנחם</span>
+          </div>
         </div>
       </div>
     </div>
@@ -913,13 +1155,18 @@
     </button>
   </div>
 
-  <!-- CLEAN BOUGHT -->
-  <button class="clean-btn" id="clean-btn" onclick="confirmCleanBought()">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M2 3.5 L12 3.5 M5 3.5 L5 2 L9 2 L9 3.5 M3 3.5 L3 12 Q3 13 4 13 L10 13 Q11 13 11 12 L11 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    נקה שנקנו
-  </button>
+
+
+  <!-- SELECT ALL BAR -->
+  <div class="select-all-bar" id="select-all-bar">
+    <button class="select-all-btn" onclick="selectAll()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <rect x="1" y="1" width="11" height="11" rx="3" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M3 6.5 L5.5 9 L10 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      בחר הכל
+    </button>
+  </div>
 
   <!-- LIST AREA -->
   <div class="list-area" id="list-area"></div>
@@ -1250,10 +1497,10 @@ function switchScreen(fromId, toId) {
 
 // ---- APP INIT ----
 function initApp() {
-  // mark current user chip
   document.getElementById(`chip-${currentUser}`).classList.add('me');
   listenOnline();
   listenItems();
+  listenArchive();
   buildCatGrid();
 }
 
@@ -1305,17 +1552,18 @@ function renderList() {
         <span class="cat-count">${catItems.length}</span>
       </div>`;
 
-    catItems.sort((a, b) => (a[1].bought ? 1 : 0) - (b[1].bought ? 1 : 0));
+    catItems.sort((a, b) => (b[1].createdAt||0) - (a[1].createdAt||0));
     catItems.forEach(([id, it]) => {
       const ownerColor = it.owner === 'natan' ? 'natan' : 'menachem';
       const priceHtml = it.price === null
         ? `<span class="item-price unknown">מחיר לא ידוע</span>`
         : `<span class="item-price">₪${Number(it.price).toLocaleString('he-IL')}</span>`;
 
-      html += `<div class="item-card ${it.bought ? 'bought' : ''}" id="card-${id}">
-        <div class="item-check" onclick="toggleBought('${id}')">
-          ${it.bought ? `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6 L5 9 L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+      html += `<div class="item-card ${selectedIds.has(id) ? 'selected-for-action' : ''}" id="card-${id}" oncontextmenu="event.preventDefault();toggleSelect('${id}')">
+        <div class="item-select-dot" onclick="toggleSelect('${id}')">
+          ${selectedIds.has(id) ? `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6 L5 9 L10 3" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
         </div>
+
         <div class="item-body">
           <div class="item-name">${it.name}</div>
           <div class="item-meta">
@@ -1437,20 +1685,15 @@ window.aiCheckPrice = function() {
 };
 
 window.saveItem = function() {
-  const price = addState.priceStr === '0' ? null : Number(addState.priceStr);
-  const item = {
-    name: addState.name,
-    type: addState.urgency,
-    category: addState.category,
-    price: price,
-    owner: currentUser,
-    bought: false,
-    createdAt: Date.now()
-  };
-  const id = uid();
-  set(ref(db, `items/${id}`), item);
-  closeSheet();
-  if (currentTab !== addState.urgency) switchTab(addState.urgency);
+  if (!pendingItemSave) {
+    const similar = findSimilarItem(addState.name);
+    if (similar) {
+      pendingItemSave = true;
+      showDupDialog(similar.item);
+      return;
+    }
+  }
+  doSaveItem();
 };
 
 // ---- EDIT ----
@@ -1551,6 +1794,325 @@ window.closeSheet = function() {
 
 // ---- BOOT ----
 
+
+// ---- SELECTION STATE ----
+let selectedIds = new Set();
+
+function updateActionBar() {
+  const bar = document.getElementById('action-bar');
+  const selAllBar = document.getElementById('select-all-bar');
+  const count = document.getElementById('action-bar-count');
+  const fab = document.querySelector('.fab');
+  if (selectedIds.size > 0) {
+    bar.classList.add('show');
+    selAllBar.classList.add('show');
+    count.textContent = selectedIds.size + ' נבחרו';
+    fab.style.opacity = '0';
+    fab.style.pointerEvents = 'none';
+  } else {
+    bar.classList.remove('show');
+    selAllBar.classList.remove('show');
+    fab.style.opacity = '1';
+    fab.style.pointerEvents = 'all';
+  }
+}
+
+window.clearSelection = function() {
+  selectedIds.clear();
+  updateActionBar();
+  renderList();
+};
+
+window.selectAll = function() {
+  const tabItems = Object.entries(items).filter(([, it]) => it.type === currentTab);
+  tabItems.forEach(([id]) => selectedIds.add(id));
+  updateActionBar();
+  renderList();
+};
+
+window.confirmDeleteSelected = function() {
+  if (selectedIds.size === 0) return;
+  const count = selectedIds.size;
+  showConfirm(
+    '<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="rgba(255,107,107,0.1)" stroke="rgba(255,107,107,0.3)" stroke-width="1.5"/><path d="M12 13 L28 13 M16 13 L16 10 L24 10 L24 13 M14 13 L14 30 Q14 31 15 31 L25 31 Q26 31 26 30 L26 13" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'למחוק ' + count + ' פריטים?',
+    'פריטים שנמחקים לא ניתן לשחזר.',
+    () => {
+      selectedIds.forEach(id => remove(ref(db, 'items/' + id)));
+      clearSelection();
+    }
+  );
+};
+
+window.toggleSelect = function(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  const card = document.getElementById('card-' + id);
+  if (card) card.classList.toggle('selected-for-action', selectedIds.has(id));
+  updateActionBar();
+};
+
+// ---- ARCHIVE ----
+let archiveItems = {};
+
+function listenArchive() {
+  onValue(ref(db, 'archive'), snap => {
+    archiveItems = snap.val() || {};
+    const count = Object.keys(archiveItems).length;
+    const badge = document.getElementById('archive-badge');
+    if (badge) {
+      badge.textContent = count;
+      badge.classList.toggle('show', count > 0);
+    }
+    if (document.getElementById('archive-screen').classList.contains('active')) {
+      renderArchive();
+    }
+  });
+}
+
+window.archiveSelected = function() {
+  if (selectedIds.size === 0) return;
+  selectedIds.forEach(id => {
+    const it = items[id];
+    if (!it) return;
+    const archiveEntry = {
+      name: it.name,
+      category: it.category,
+      type: it.type || 'wish',
+      owner: it.owner,
+      archivedAt: Date.now()
+    };
+    set(ref(db, 'archive/' + id), archiveEntry);
+    remove(ref(db, 'items/' + id));
+  });
+  const count = selectedIds.size;
+  clearSelection();
+  showToast(count + ' פריטים הועברו לארכיון', 'success');
+};
+
+window.openArchive = function() {
+  const appScreen = document.getElementById('app-screen');
+  const archiveScreen = document.getElementById('archive-screen');
+  appScreen.classList.remove('active');
+  appScreen.classList.add('exit');
+  setTimeout(() => {
+    appScreen.classList.remove('exit');
+    archiveScreen.classList.add('active');
+    renderArchive();
+  }, 350);
+};
+
+window.closeArchive = function() {
+  const appScreen = document.getElementById('app-screen');
+  const archiveScreen = document.getElementById('archive-screen');
+  archiveScreen.classList.remove('active');
+  archiveScreen.classList.add('exit');
+  setTimeout(() => {
+    archiveScreen.classList.remove('exit');
+    appScreen.classList.add('active');
+  }, 350);
+};
+
+function renderArchive() {
+  const list = document.getElementById('archive-list');
+  const entries = Object.entries(archiveItems);
+  document.getElementById('archive-count-badge').textContent = entries.length + ' פריטים';
+
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty-state"><svg width="64" height="64" viewBox="0 0 64 64" fill="none"><rect x="8" y="20" width="48" height="10" rx="4" stroke="#2a2a38" stroke-width="2"/><path d="M12 30 L12 52 Q12 54 14 54 L50 54 Q52 54 52 52 L52 30" stroke="#2a2a38" stroke-width="2"/><path d="M26 40 L32 46 L38 40" stroke="#2a2a38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="empty-state-title">הארכיון ריק</div><div class="empty-state-sub">פריטים שהועברו לארכיון<br>יופיעו כאן</div></div>';
+    return;
+  }
+
+  entries.sort((a, b) => (b[1].archivedAt || 0) - (a[1].archivedAt || 0));
+
+  const html = entries.map(([id, it]) => {
+    const cat = CATEGORIES.find(c => c.id === it.category) || CATEGORIES[CATEGORIES.length - 1];
+    const date = it.archivedAt ? new Date(it.archivedAt).toLocaleDateString('he-IL') : '';
+    return '<div class="archive-item-wrap" id="awrap-' + id + '">' +
+      '<div class="swipe-bg restore">' +
+        '<div class="swipe-bg-label">' +
+          '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8 L13 8 M9 4 L13 8 L9 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          'חזרה לרשימה' +
+        '</div>' +
+      '</div>' +
+      '<div class="swipe-bg delete">' +
+        '<div class="swipe-bg-label">' +
+          '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4 L14 4 M5 4 L5 2.5 L11 2.5 L11 4 M3.5 4 L3.5 13 Q3.5 14 4.5 14 L11.5 14 Q12.5 14 12.5 13 L12.5 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          'מחיקה' +
+        '</div>' +
+      '</div>' +
+      '<div class="archive-item" id="aitem-' + id + '" data-id="' + id + '">' +
+        '<div class="archive-item-icon" style="background:' + cat.color + '22">' + cat.svg + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="archive-item-name">' + it.name + '</div>' +
+          '<div style="display:flex;gap:8px;margin-top:3px">' +
+            '<span class="archive-item-owner">' + (USERS[it.owner]?.label || it.owner) + '</span>' +
+            (date ? '<span class="archive-item-date">' + date + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  list.innerHTML = html;
+  initSwipeListeners();
+}
+
+// ---- DUPLICATE CHECK ----
+let pendingItemSave = false;
+
+function findSimilarItem(name) {
+  const lower = name.toLowerCase().trim();
+  const words = lower.split(/\s+/).filter(w => w.length > 1);
+  for (const [id, it] of Object.entries(items)) {
+    const existingLower = it.name.toLowerCase().trim();
+    if (existingLower === lower) return { id, item: it };
+    // check word overlap
+    const existingWords = existingLower.split(/\s+/).filter(w => w.length > 1);
+    const overlap = words.some(w => existingWords.some(ew => ew.includes(w) || w.includes(ew)));
+    if (overlap) return { id, item: it };
+  }
+  return null;
+}
+
+window.closeDupDialog = function() {
+  document.getElementById('dup-dialog').classList.remove('show');
+  pendingItemSave = false;
+};
+
+window.forceAddItem = function() {
+  document.getElementById('dup-dialog').classList.remove('show');
+  pendingItemSave = false;
+  doSaveItem();
+};
+
+function showDupDialog(existingItem) {
+  const cat = CATEGORIES.find(c => c.id === existingItem.category) || CATEGORIES[CATEGORIES.length-1];
+  document.getElementById('dup-body').textContent = 'פריט בשם דומה כבר ברשימה של ' + (USERS[existingItem.owner]?.label || existingItem.owner) + ':';
+  document.getElementById('dup-existing').innerHTML =
+    '<div class="archive-item-icon" style="background:' + cat.color + '22;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + cat.svg + '</div>' +
+    '<div class="dup-existing-name">' + existingItem.name + '</div>' +
+    '<div class="dup-existing-owner">' + (USERS[existingItem.owner]?.label || existingItem.owner) + '</div>';
+  document.getElementById('dup-dialog').classList.add('show');
+}
+
+function doSaveItem() {
+  const price = addState.priceStr === '0' ? null : Number(addState.priceStr);
+  const item = {
+    name: addState.name,
+    type: addState.urgency,
+    category: addState.category,
+    price: price,
+    owner: currentUser,
+    bought: false,
+    createdAt: Date.now()
+  };
+  const id = uid();
+  set(ref(db, 'items/' + id), item);
+  closeSheet();
+  if (currentTab !== addState.urgency) switchTab(addState.urgency);
+}
+
+
+// ---- SWIPE IN ARCHIVE ----
+function initSwipeListeners() {
+  document.querySelectorAll('.archive-item[data-id]').forEach(el => {
+    let startX = 0, startY = 0, currentX = 0, isSwiping = false, confirmed = false;
+    const id = el.getAttribute('data-id');
+    const wrap = document.getElementById('awrap-' + id);
+    const restoreBg = wrap.querySelector('.swipe-bg.restore');
+    const deleteBg = wrap.querySelector('.swipe-bg.delete');
+    const THRESHOLD = 80;
+    const CONFIRM_THRESHOLD = 160;
+
+    el.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      currentX = 0; confirmed = false;
+      el.classList.add('swiping');
+    }, { passive: true });
+
+    el.addEventListener('touchmove', e => {
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      if (!isSwiping && Math.abs(dy) > Math.abs(dx)) return;
+      isSwiping = true;
+      currentX = dx;
+      el.style.transform = 'translateX(' + dx + 'px)';
+
+      // show bg based on direction
+      if (dx < -THRESHOLD) {
+        // swipe left = restore
+        restoreBg.style.opacity = Math.min(1, (Math.abs(dx) - THRESHOLD) / 60) + '';
+        deleteBg.style.opacity = '0';
+      } else if (dx > THRESHOLD) {
+        // swipe right = delete
+        deleteBg.style.opacity = Math.min(1, (dx - THRESHOLD) / 60) + '';
+        restoreBg.style.opacity = '0';
+      } else {
+        restoreBg.style.opacity = '0';
+        deleteBg.style.opacity = '0';
+      }
+    }, { passive: true });
+
+    el.addEventListener('touchend', () => {
+      isSwiping = false;
+      el.classList.remove('swiping');
+      restoreBg.style.opacity = '0';
+      deleteBg.style.opacity = '0';
+
+      if (currentX < -CONFIRM_THRESHOLD) {
+        // fly out left = restore
+        el.classList.add('fly-out');
+        el.style.transform = 'translateX(-120%)';
+        setTimeout(() => restoreFromArchive(id), 300);
+      } else if (currentX > CONFIRM_THRESHOLD) {
+        // fly out right = delete - first half confirm
+        if (!confirmed) {
+          confirmed = true;
+          el.classList.add('snap-back');
+          el.style.transform = 'translateX(60px)';
+          setTimeout(() => {
+            el.style.transform = 'translateX(0)';
+            showToast('החלק שוב למחיקה סופית', 'error');
+          }, 300);
+        } else {
+          el.classList.add('fly-out');
+          el.style.transform = 'translateX(120%)';
+          setTimeout(() => deleteFromArchive(id), 300);
+        }
+      } else {
+        el.classList.add('snap-back');
+        el.style.transform = 'translateX(0)';
+        setTimeout(() => el.classList.remove('snap-back'), 300);
+      }
+      currentX = 0;
+    });
+  });
+}
+
+function restoreFromArchive(id) {
+  const it = archiveItems[id];
+  if (!it) return;
+  const restoredItem = {
+    name: it.name,
+    category: it.category,
+    type: it.type || 'wish',
+    owner: it.owner || currentUser,
+    price: null,
+    bought: false,
+    createdAt: Date.now()
+  };
+  set(ref(db, 'items/' + id), restoredItem);
+  remove(ref(db, 'archive/' + id));
+  showToast(it.name + ' חזר לרשימה', 'success');
+}
+
+function deleteFromArchive(id) {
+  const it = archiveItems[id];
+  remove(ref(db, 'archive/' + id));
+  if (it) showToast(it.name + ' נמחק מהארכיון', 'error');
+}
 function showToast(msg, type = 'error') {
   const t = document.getElementById('toast');
   const icon = type === 'error'
@@ -1585,7 +2147,55 @@ boot();
 </script>
 
 
+
+<!-- ARCHIVE SCREEN -->
+<div class="screen" id="archive-screen">
+  <div class="archive-header">
+    <div class="archive-back-btn" onclick="closeArchive()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M7 4 L13 9 L7 14" stroke="#9898aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="archive-title">ארכיון</div>
+    <div class="archive-count-badge" id="archive-count-badge">0 פריטים</div>
+  </div>
+  <div class="archive-list" id="archive-list"></div>
+</div>
+
+<!-- ACTION BAR -->
+<div class="action-bar" id="action-bar">
+  <div class="action-bar-count" id="action-bar-count">0 נבחרו</div>
+  <button class="action-bar-btn cancel-sel" onclick="clearSelection()">ביטול</button>
+  <button class="action-bar-btn delete-sel" onclick="confirmDeleteSelected()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M2 4 L14 4 M5 4 L5 2.5 L11 2.5 L11 4 M3.5 4 L3.5 13 Q3.5 14 4.5 14 L11.5 14 Q12.5 14 12.5 13 L12.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    מחק
+  </button>
+  <button class="action-bar-btn archive" onclick="archiveSelected()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="1" y="3" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M2.5 6 L2.5 13 Q2.5 14 3.5 14 L12.5 14 Q13.5 14 13.5 13 L13.5 6" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M6 9 L8 11 L10 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    ארכיון
+  </button>
+</div>
+
+<!-- DUPLICATE WARNING -->
+<div class="dup-dialog" id="dup-dialog">
+  <div class="dup-box">
+    <div class="dup-handle"></div>
+    <div class="dup-title">רגע — פריט דומה קיים</div>
+    <div class="dup-body" id="dup-body">פריט בשם דומה כבר ברשימה:</div>
+    <div class="dup-existing" id="dup-existing"></div>
+    <div class="dup-actions">
+      <button class="dup-btn cancel" onclick="closeDupDialog()">ביטול</button>
+      <button class="dup-btn add-anyway" onclick="forceAddItem()">הוסף בכל זאת</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 </body>
-</html> 
+</html>
