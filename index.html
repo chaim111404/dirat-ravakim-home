@@ -212,22 +212,33 @@
 
   .users-strip { display: flex; gap: 8px; }
   .user-chip {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--card); border-radius: 50px;
-    padding: 5px 12px 5px 8px;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card); border-radius: 14px;
+    padding: 7px 12px 7px 10px;
     border: 1.5px solid transparent;
+    min-width: 120px;
+    transition: all 0.3s;
   }
-  .user-chip.natan { border-color: rgba(0,212,170,0.3); }
-  .user-chip.menachem { border-color: rgba(167,139,250,0.3); }
-  .user-chip.me { box-shadow: 0 0 0 1.5px var(--card-color); }
-  .user-chip.natan { --card-color: var(--natan); }
-  .user-chip.menachem { --card-color: var(--menachem); }
-  .user-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .user-chip.natan .user-dot { background: var(--natan); box-shadow: 0 0 6px var(--natan); }
-  .user-chip.menachem .user-dot { background: var(--menachem); box-shadow: 0 0 6px var(--menachem); }
-  .user-chip-name { font-size: 12px; font-weight: 600; }
+  .user-chip.natan { border-color: rgba(0,212,170,0.25); --card-color: var(--natan); }
+  .user-chip.menachem { border-color: rgba(167,139,250,0.25); --card-color: var(--menachem); }
+  .user-chip.me { border-color: var(--card-color); box-shadow: 0 0 12px rgba(0,0,0,0.2); }
+  .user-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    background: var(--text3); transition: all 0.3s;
+  }
+  .user-chip.online.natan .user-dot { background: var(--natan); box-shadow: 0 0 6px var(--natan); animation: pulse 1.5s infinite; }
+  .user-chip.online.menachem .user-dot { background: var(--menachem); box-shadow: 0 0 6px var(--menachem); animation: pulse 1.5s infinite; }
+  .user-chip:not(.online) .user-dot { background: var(--text3); box-shadow: none; animation: none; }
+  .user-chip-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .user-chip-name { font-size: 13px; font-weight: 700; }
   .user-chip.natan .user-chip-name { color: var(--natan); }
   .user-chip.menachem .user-chip-name { color: var(--menachem); }
+  .user-chip-status {
+    font-size: 10px; color: var(--text3); font-weight: 400;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 90px; transition: all 0.3s;
+  }
+  .user-chip.online .user-chip-status { color: var(--text2); }
 
   /* TOTALS */
   .totals-row {
@@ -1119,11 +1130,17 @@
         <div class="users-strip">
           <div class="user-chip natan" id="chip-natan">
             <div class="user-dot"></div>
-            <span class="user-chip-name">נתן</span>
+            <div class="user-chip-info">
+              <span class="user-chip-name">נתן</span>
+              <span class="user-chip-status" id="status-natan">לא מחובר</span>
+            </div>
           </div>
           <div class="user-chip menachem" id="chip-menachem">
             <div class="user-dot"></div>
-            <span class="user-chip-name">מנחם</span>
+            <div class="user-chip-info">
+              <span class="user-chip-name">מנחם</span>
+              <span class="user-chip-status" id="status-menachem">לא מחובר</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1367,7 +1384,7 @@
 <!-- FIREBASE SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, remove, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: ["A"+"I"+"z"+"a"+"S"+"y"+"AwMe9tJQaYqB0B1gu9nW93xuX1W92dKzw"].join(""),
@@ -1420,24 +1437,70 @@ function animateNumber(el, newVal) {
 
 // ---- ONLINE PRESENCE ----
 function setOnline(user) {
-  set(ref(db, `online/${user}`), true);
-  window.addEventListener('beforeunload', () => set(ref(db, `online/${user}`), false));
+  const userRef = ref(db, 'online/' + user);
+  const now = Date.now();
+  set(userRef, { online: true, lastSeen: now, since: now });
+  // Firebase detects disconnect automatically (tab close, network drop)
+  onDisconnect(userRef).set({ online: false, lastSeen: Date.now(), since: now });
+  // Extra safety on page unload
+  window.addEventListener('beforeunload', () => {
+    set(userRef, { online: false, lastSeen: Date.now(), since: now });
+  });
+}
+
+function formatLastSeen(ts) {
+  if (!ts) return 'לא מחובר';
+  const now = Date.now();
+  const diff = now - ts;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  const timeStr = new Date(ts).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+  if (mins < 1) return 'נראה עכשיו';
+  if (hours < 1) return 'לפני ' + mins + ' דק׳';
+  if (days < 1) return 'היום בשעה ' + timeStr;
+  if (days === 1) return 'אתמול בשעה ' + timeStr;
+  if (days === 2) return 'לפני יומיים בשעה ' + timeStr;
+  return new Date(ts).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' }) + ' בשעה ' + timeStr;
 }
 
 function listenOnline() {
   onValue(ref(db, 'online'), snap => {
     onlineUsers = snap.val() || {};
     Object.keys(USERS).forEach(u => {
-      const chip = document.getElementById(`chip-${u}`);
+      const chip = document.getElementById('chip-' + u);
+      const statusEl = document.getElementById('status-' + u);
       if (!chip) return;
-      if (onlineUsers[u]) {
-        chip.style.opacity = '1';
-      } else {
-        chip.style.opacity = '0.35';
+      const data = onlineUsers[u];
+      const isOnline = data && data.online === true;
+      chip.classList.toggle('online', isOnline);
+      chip.style.opacity = '1';
+      if (statusEl) {
+        if (isOnline) {
+          const since = data.since;
+          const sinceStr = since ? new Date(since).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
+          statusEl.textContent = sinceStr ? 'מחובר מ-' + sinceStr : 'מחובר';
+        } else {
+          const lastSeen = data && data.lastSeen;
+          statusEl.textContent = lastSeen ? 'נראה ' + formatLastSeen(lastSeen) : 'לא מחובר';
+        }
       }
     });
   });
 }
+
+// Update lastSeen display every minute
+setInterval(() => {
+  if (!document.getElementById('app-screen')?.classList.contains('active')) return;
+  Object.keys(USERS).forEach(u => {
+    const statusEl = document.getElementById('status-' + u);
+    const data = onlineUsers[u];
+    if (!statusEl || !data || data.online) return;
+    const lastSeen = data.lastSeen;
+    if (lastSeen) statusEl.textContent = 'נראה ' + formatLastSeen(lastSeen);
+  });
+}, 60000);
 
 // ---- USER SELECTION ----
 window.selectUser = async function(user) {
@@ -1447,7 +1510,9 @@ window.selectUser = async function(user) {
     onValue(r, snap => res(snap), { onlyOnce: true });
   });
 
-  if (snap.val() === true && user !== currentUser) {
+  const snapVal = snap.val();
+  const isOnline = snapVal === true || (snapVal && snapVal.online === true);
+  if (isOnline && user !== currentUser) {
     const err = document.getElementById('error-msg');
     err.classList.add('show');
     setTimeout(() => err.classList.remove('show'), 3000);
@@ -1460,7 +1525,9 @@ window.selectUser = async function(user) {
   });
   const online = onlineSnap.val() || {};
   const otherUser = user === 'natan' ? 'menachem' : 'natan';
-  if (online[otherUser] === true && online[user] === true) {
+  const otherOnline = online[otherUser] === true || (online[otherUser] && online[otherUser].online === true);
+  const thisOnline = online[user] === true || (online[user] && online[user].online === true);
+  if (otherOnline && thisOnline) {
     const err = document.getElementById('error-msg');
     err.textContent = 'האתר פרטי ובשימוש — כרגע שני המשתמשים מחוברים';
     err.classList.add('show');
@@ -2163,7 +2230,7 @@ async function boot() {
     const saved = localStorage.getItem('bayit_user_v3');
     if (saved && USERS[saved]) {
       currentUser = saved;
-      await set(ref(db, 'online/' + saved), false);
+      await set(ref(db, 'online/' + saved), { online: false, lastSeen: Date.now() });
       setOnline(saved);
       document.getElementById('app-screen').classList.add('active');
       initApp();
