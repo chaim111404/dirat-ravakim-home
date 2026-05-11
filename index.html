@@ -1416,7 +1416,7 @@ window.numpadDel = function() {
 };
 
 window.skipPrice = function() {
-  addState.price = null;
+  addState.priceStr = '0';
   saveItem();
 };
 
@@ -1473,7 +1473,7 @@ window.aiCheckPrice = async function() {
 };
 
 window.saveItem = function() {
-  const price = addState.price === null ? null : (addState.priceStr === '0' ? null : Number(addState.priceStr));
+  const price = addState.priceStr === '0' ? null : Number(addState.priceStr);
   const item = {
     name: addState.name,
     type: addState.urgency,
