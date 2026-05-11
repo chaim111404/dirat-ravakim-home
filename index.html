@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>בית רווקים</title>
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="בית רווקים">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0f'/%3E%3Cpath d='M90 30 L140 65 L140 150 L40 150 L40 65 Z' fill='none' stroke='%2300d4aa' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M70 150 L70 105 Q70 95 80 95 L100 95 Q110 95 110 105 L110 150' fill='%2300d4aa' opacity='0.3'/%3E%3Ccircle cx='90' cy='75' r='8' fill='%2300d4aa'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D7%91%D7%99%D7%AA%20%D7%A8%D7%95%D7%95%D7%A7%D7%99%D7%9D%22%2C%22short_name%22%3A%22%D7%91%D7%99%D7%AA%22%2C%22theme_color%22%3A%22%230a0a0f%22%2C%22background_color%22%3A%22%230a0a0f%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%7D">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #18181f;
+    --card: #1c1c26;
+    --card2: #22222e;
+    --border: #2a2a38;
+    --accent: #00d4aa;
+    --accent2: #00b894;
+    --accent-glow: rgba(0,212,170,0.15);
+    --accent-glow2: rgba(0,212,170,0.08);
+    --urgent: #ff6b6b;
+    --urgent-glow: rgba(255,107,107,0.15);
+    --wish: #a78bfa;
+    --wish-glow: rgba(167,139,250,0.15);
+    --bought: #2a3d2a;
+    --bought-text: #4ade80;
+    --text: #f0f0f5;
+    --text2: #9898aa;
+    --text3: #5a5a6e;
+    --natan: #00d4aa;
+    --menachem: #a78bfa;
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Heebo', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ---- SCROLLBAR ---- */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ---- SCREENS ---- */
+  .screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(20px);
+    overflow: hidden;
+  }
+  .screen.active {
+    opacity: 1; pointer-events: all; transform: translateY(0);
+  }
+  .screen.exit {
+    opacity: 0; transform: translateY(-20px);
+  }
+
+  /* ---- BACKGROUND BLOBS ---- */
+  .bg-blob {
+    position: fixed; border-radius: 50%;
+    filter: blur(80px); opacity: 0.07; pointer-events: none; z-index: 0;
+  }
+  .blob1 { width: 300px; height: 300px; background: var(--accent); top: -100px; right: -80px; }
+  .blob2 { width: 250px; height: 250px; background: var(--wish); bottom: -80px; left: -60px; }
+  .blob3 { width: 200px; height: 200px; background: var(--urgent); top: 40%; left: 50%; transform: translateX(-50%); }
+
+  /* ---- WELCOME SCREEN ---- */
+  #welcome-screen { padding: 32px 24px; }
+
+  .welcome-logo {
+    margin-bottom: 32px; z-index: 1;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .welcome-title {
+    font-size: 32px; font-weight: 900;
+    text-align: center; line-height: 1.2;
+    margin-bottom: 8px; z-index: 1;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .welcome-sub {
+    font-size: 15px; color: var(--text2);
+    text-align: center; margin-bottom: 48px; z-index: 1;
+  }
+
+  .name-cards { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 340px; z-index: 1; }
+
+  .name-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all 0.25s ease;
+    position: relative; overflow: hidden;
+  }
+  .name-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--accent-glow2); opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .name-card:active::before { opacity: 1; }
+  .name-card.natan { --card-color: var(--natan); }
+  .name-card.menachem { --card-color: var(--menachem); }
+  .name-card:hover { border-color: var(--card-color); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+  .name-card-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--card-color); opacity: 0.15;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .name-card-avatar svg { position: absolute; opacity: 0.8; }
+
+  .name-card-info { flex: 1; margin-right: 14px; }
+  .name-card-name { font-size: 20px; font-weight: 700; color: var(--text); }
+  .name-card-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .name-card-arrow { color: var(--text3); transition: color 0.2s, transform 0.2s; }
+  .name-card:hover .name-card-arrow { color: var(--card-color); transform: translateX(-4px); }
+
+  .error-msg {
+    margin-top: 16px; padding: 12px 18px;
+    background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3);
+    border-radius: var(--radius-sm); color: var(--urgent);
+    font-size: 13px; text-align: center; z-index: 1;
+    display: none;
+  }
+  .error-msg.show { display: block; animation: shake 0.3s ease; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  /* ---- GREETING SCREEN ---- */
+  #greeting-screen { padding: 32px 24px; }
+  .greeting-icon { z-index: 1; margin-bottom: 28px; animation: float 3s ease-in-out infinite; }
+  .greeting-title {
+    font-size: 28px; font-weight: 900; text-align: center;
+    line-height: 1.3; z-index: 1; margin-bottom: 12px;
+  }
+  .greeting-title span { color: var(--accent); }
+  .greeting-body {
+    font-size: 15px; color: var(--text2); text-align: center;
+    max-width: 300px; line-height: 1.7; z-index: 1; margin-bottom: 40px;
+  }
+  .greeting-body strong { color: var(--text); font-weight: 600; }
+
+  .greeting-cta {
+    background: var(--accent); color: #000;
+    font-family: 'Heebo', sans-serif;
+    font-size: 16px; font-weight: 800;
+    border: none; border-radius: 50px;
+    padding: 16px 40px; cursor: pointer;
+    z-index: 1;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(0,212,170,0.3);
+  }
+  .greeting-cta:active { transform: scale(0.96); }
+
+  /* ---- MAIN APP ---- */
+  #app-screen {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .topbar-row1 {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .app-logo-row { display: flex; align-items: center; gap: 8px; }
+  .app-logo-text { font-size: 18px; font-weight: 800; color: var(--text); }
+
+  .users-strip { display: flex; gap: 8px; }
+  .user-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--card); border-radius: 50px;
+    padding: 5px 12px 5px 8px;
+    border: 1.5px solid transparent;
+  }
+  .user-chip.natan { border-color: rgba(0,212,170,0.3); }
+  .user-chip.menachem { border-color: rgba(167,139,250,0.3); }
+  .user-chip.me { box-shadow: 0 0 0 1.5px var(--card-color); }
+  .user-chip.natan { --card-color: var(--natan); }
+  .user-chip.menachem { --card-color: var(--menachem); }
+  .user-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .user-chip.natan .user-dot { background: var(--natan); box-shadow: 0 0 6px var(--natan); }
+  .user-chip.menachem .user-dot { background: var(--menachem); box-shadow: 0 0 6px var(--menachem); }
+  .user-chip-name { font-size: 12px; font-weight: 600; }
+  .user-chip.natan .user-chip-name { color: var(--natan); }
+  .user-chip.menachem .user-chip-name { color: var(--menachem); }
+
+  /* TOTALS */
+  .totals-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .total-box {
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .total-box-label { font-size: 9px; color: var(--text3); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
+  .total-box-amount {
+    font-size: 16px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s;
+  }
+  .total-box-amount .shekel { font-size: 11px; font-weight: 600; }
+  .total-box.urgent .total-box-amount { color: var(--urgent); }
+  .total-box.wish .total-box-amount { color: var(--wish); }
+  .total-box.all .total-box-amount { color: var(--accent); }
+
+  /* TABS */
+  .tabs {
+    display: flex; background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px; gap: 4px;
+    flex-shrink: 0; z-index: 9;
+  }
+  .tab-btn {
+    flex: 1; padding: 12px 0;
+    background: none; border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--text3); cursor: pointer;
+    position: relative; transition: color 0.2s;
+  }
+  .tab-btn.active { color: var(--text); }
+  .tab-btn::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 20%; width: 60%; height: 2.5px;
+    background: var(--accent); border-radius: 2px;
+    transform: scaleX(0); transition: transform 0.25s ease;
+  }
+  .tab-btn.active::after { transform: scaleX(1); }
+  .tab-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    font-size: 10px; font-weight: 700; margin-right: 4px;
+    vertical-align: middle;
+  }
+  .tab-btn.active.urgent-tab .tab-count { background: rgba(255,107,107,0.2); color: var(--urgent); }
+  .tab-btn.active.wish-tab .tab-count { background: rgba(167,139,250,0.2); color: var(--wish); }
+  .tab-btn:not(.active) .tab-count { background: var(--card); color: var(--text3); }
+
+  /* LIST AREA */
+  .list-area {
+    flex: 1; overflow-y: auto;
+    padding: 16px 16px 120px;
+  }
+
+  /* CATEGORY GROUP */
+  .cat-group { margin-bottom: 20px; }
+  .cat-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px; padding: 0 2px;
+  }
+  .cat-icon-wrap {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cat-label { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text2); }
+  .cat-count { font-size: 11px; color: var(--text3); margin-right: auto; }
+
+  /* ITEM CARD */
+  .item-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 14px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.3s ease;
+    position: relative; overflow: hidden;
+  }
+  .item-card.bought {
+    background: var(--bought); border-color: rgba(74,222,128,0.15);
+    opacity: 0.7;
+  }
+  .item-card.bought .item-name { text-decoration: line-through; color: var(--text3); }
+
+  .item-check {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .item-card.bought .item-check {
+    background: var(--bought-text); border-color: var(--bought-text);
+  }
+  .item-check:active { transform: scale(0.85); }
+
+  .item-body { flex: 1; min-width: 0; }
+  .item-name { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .item-price {
+    font-size: 13px; font-weight: 700;
+    color: var(--accent);
+  }
+  .item-price.unknown { color: var(--text3); font-weight: 400; font-style: italic; }
+  .item-owner-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .item-owner-dot.natan { background: var(--natan); }
+  .item-owner-dot.menachem { background: var(--menachem); }
+
+  .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .item-action-btn {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--card2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .item-action-btn:active { transform: scale(0.88); }
+  .item-action-btn.delete:hover { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.3); }
+  .item-action-btn.edit:hover { background: rgba(0,212,170,0.1); border-color: rgba(0,212,170,0.3); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 60px 24px; text-align: center;
+  }
+  .empty-state svg { margin-bottom: 20px; opacity: 0.3; }
+  .empty-state-title { font-size: 18px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+  .empty-state-sub { font-size: 13px; color: var(--text3); line-height: 1.6; }
+
+  /* FAB */
+  .fab {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #000;
+    border: none; border-radius: 50px;
+    padding: 16px 32px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 15px; font-weight: 800;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,212,170,0.4);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .fab:active { transform: translateX(-50%) scale(0.95); box-shadow: 0 2px 12px rgba(0,212,170,0.25); }
+
+  /* BOTTOM SHEET OVERLAY */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .overlay.show { opacity: 1; pointer-events: all; }
+
+  /* BOTTOM SHEET */
+  .sheet {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg2);
+    border-radius: 24px 24px 0 0;
+    border-top: 1px solid var(--border);
+    padding: 0 20px 40px;
+    z-index: 300;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .sheet.show { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 40px; height: 4px;
+    background: var(--border); border-radius: 4px;
+    margin: 12px auto 20px;
+  }
+  .sheet-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+
+  /* STEP INDICATORS */
+  .steps { display: flex; gap: 6px; margin-bottom: 24px; }
+  .step-dot {
+    height: 4px; border-radius: 4px;
+    background: var(--border); flex: 1;
+    transition: background 0.3s, flex 0.3s;
+  }
+  .step-dot.active { background: var(--accent); flex: 2; }
+  .step-dot.done { background: var(--accent2); }
+
+  /* URGENCY CHOICE */
+  .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+  .choice-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center; cursor: pointer;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .choice-card:active { transform: scale(0.96); }
+  .choice-card.urgent-opt:hover, .choice-card.urgent-opt.selected {
+    border-color: var(--urgent); background: var(--urgent-glow);
+  }
+  .choice-card.wish-opt:hover, .choice-card.wish-opt.selected {
+    border-color: var(--wish); background: var(--wish-glow);
+  }
+  .choice-card-label { font-size: 14px; font-weight: 700; }
+  .choice-card-sub { font-size: 11px; color: var(--text3); }
+
+  /* CATEGORY GRID */
+  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .cat-opt {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 8px;
+    text-align: center; cursor: pointer;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .cat-opt:active { transform: scale(0.94); }
+  .cat-opt.selected { border-color: var(--accent); background: var(--accent-glow); }
+  .cat-opt-label { font-size: 11px; font-weight: 600; color: var(--text2); }
+
+  /* TEXT INPUT */
+  .input-field {
+    width: 100%;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    color: var(--text);
+    font-family: 'Heebo', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--text3); }
+
+  /* NUMBER PAD */
+  .numpad-display {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .numpad-display-val {
+    font-size: 28px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    flex: 1;
+    color: var(--text);
+  }
+  .numpad-shekel-icon { color: var(--accent); flex-shrink: 0; }
+
+  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .numpad-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    height: 56px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 20px; font-weight: 700;
+    color: var(--text); cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .numpad-btn:active { background: var(--card2); transform: scale(0.93); }
+  .numpad-btn.del { font-size: 16px; color: var(--text2); }
+  .numpad-btn.zero { grid-column: span 2; }
+
+  .skip-price-btn {
+    width: 100%; padding: 14px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px; color: var(--text2);
+    cursor: pointer; margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+  .skip-price-btn:active { background: var(--card2); }
+
+  /* SHEET NEXT BTN */
+  .sheet-next-btn {
+    width: 100%; padding: 16px;
+    background: var(--accent); color: #000;
+    border: none; border-radius: 50px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 16px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .sheet-next-btn:active { transform: scale(0.97); }
+  .sheet-next-btn:disabled { background: var(--border); color: var(--text3); cursor: not-allowed; }
+
+  /* CONFIRM DIALOG */
+  .confirm-dialog {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(6px);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .confirm-dialog.show { opacity: 1; pointer-events: all; }
+  .confirm-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px; width: 100%;
+    max-width: 340px; text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.25s;
+  }
+  .confirm-dialog.show .confirm-box { transform: scale(1); }
+  .confirm-box-icon { margin-bottom: 16px; }
+  .confirm-box-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .confirm-box-body { font-size: 14px; color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-btn {
+    flex: 1; padding: 14px;
+    border-radius: 50px; border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .confirm-btn.cancel { background: var(--card); color: var(--text2); }
+  .confirm-btn.danger { background: var(--urgent); color: #fff; }
+  .confirm-btn:active { transform: scale(0.96); }
+
+  /* EDIT INLINE */
+  .item-card.editing { border-color: var(--accent); background: var(--card2); }
+  .item-edit-input {
+    background: transparent; border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 15px; font-weight: 600;
+    color: var(--text); outline: none;
+    width: 100%; border-bottom: 1px solid var(--accent);
+  }
+
+  /* LOADING */
+  .loading-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s;
+  }
+  .loading-screen.hide { opacity: 0; pointer-events: none; }
+  .loader-ring {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* NUMBER COUNTER ANIMATION */
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .count-anim { animation: countUp 0.3s ease; }
+
+  /* CLEAN BOUGHT BTN */
+  .clean-btn {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 50px; padding: 8px 16px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 12px; font-weight: 600; color: var(--text3);
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+    margin: 0 16px 12px auto;
+    width: fit-content;
+  }
+  .clean-btn:active { background: var(--card2); }
+
+  .badge-online {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; color: var(--accent); font-weight: 600;
+  }
+  .badge-online-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; color: var(--text3);
+    letter-spacing: 0.8px; text-transform: uppercase;
+    margin-bottom: 8px; display: block;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loading-screen">
+  <div class="loader-ring"></div>
+</div>
+
+<!-- BACKGROUND BLOBS -->
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
+
+<!-- WELCOME SCREEN -->
+<div class="screen" id="welcome-screen">
+  <div class="welcome-logo">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <rect width="80" height="80" rx="24" fill="#1c1c26"/>
+      <path d="M40 14 L62 28 L62 66 L18 66 L18 28 Z" fill="none" stroke="#00d4aa" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M30 66 L30 48 Q30 42 36 42 L44 42 Q50 42 50 48 L50 66" fill="rgba(0,212,170,0.15)" stroke="#00d4aa" stroke-width="1.5"/>
+      <circle cx="40" cy="34" r="5" fill="#00d4aa" opacity="0.8"/>
+      <circle cx="40" cy="14" r="3" fill="#00d4aa"/>
+    </svg>
+  </div>
+  <div class="welcome-title">בית רווקים</div>
+  <div class="welcome-sub">מה חסר לנו הפעם?</div>
+
+  <div class="name-cards">
+    <div class="name-card natan" onclick="selectUser('natan')">
+      <div class="name-card-avatar">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="8" r="4" stroke="#00d4aa" stroke-width="1.8"/>
+          <path d="M3 20 Q3 14 11 14 Q19 14 19 20" stroke="#00d4aa" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="name-card-info">
+        <div class="name-card-name">נתן</div>
+        <div class="name-card-sub">כניסה כנתן</div>
+      </div>
+      <div class="name-card-arrow">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4 L6 9 L11 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="name-card menachem" onclick="selectUser('menachem')">
+      <div class="name-card-avatar">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="8" r="4" stroke="#a78bfa" stroke-width="1.8"/>
+          <path d="M3 20 Q3 14 11 14 Q19 14 19 20" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="name-card-info">
+        <div class="name-card-name">מנחם</div>
+        <div class="name-card-sub">כניסה כמנחם</div>
+      </div>
+      <div class="name-card-arrow">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4 L6 9 L11 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="error-msg">כבר נכנס. האתר פרטי ובשימוש</div>
+</div>
+
+<!-- GREETING SCREEN -->
+<div class="screen" id="greeting-screen">
+  <div class="greeting-icon">
+    <svg width="90" height="90" viewBox="0 0 90 90" fill="none">
+      <circle cx="45" cy="45" r="40" fill="#1c1c26" stroke="#00d4aa" stroke-width="1.5" opacity="0.5"/>
+      <circle cx="45" cy="45" r="30" fill="#1c1c26" stroke="#00d4aa" stroke-width="1" opacity="0.3"/>
+      <!-- Waving hand / welcome icon -->
+      <path d="M28 55 Q28 38 45 38 Q62 38 62 55" fill="none" stroke="#00d4aa" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="45" cy="30" r="7" fill="#00d4aa" opacity="0.9"/>
+      <!-- Stars -->
+      <circle cx="20" cy="25" r="2" fill="#00d4aa" opacity="0.4"/>
+      <circle cx="70" cy="20" r="1.5" fill="#a78bfa" opacity="0.5"/>
+      <circle cx="75" cy="55" r="2" fill="#00d4aa" opacity="0.3"/>
+      <circle cx="15" cy="60" r="1.5" fill="#a78bfa" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="greeting-title">היי <span id="greeting-name"></span>!</div>
+  <div class="greeting-body">
+    עלה לך משהו שחסר בבית,<br>
+    או שאתה רוצה שיהיה פה?<br>
+    <strong>זה הזמן לרשום אותו.</strong>
+  </div>
+  <button class="greeting-cta" onclick="goToApp()">בואו נרשום</button>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="app-screen">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-row1">
+      <div class="app-logo-row">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3 L20 8.5 L20 21 L4 21 L4 8.5 Z" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M8 21 L8 14 Q8 11 10 11 L14 11 Q16 11 16 14 L16 21" fill="rgba(0,212,170,0.2)" stroke="#00d4aa" stroke-width="1.2"/>
+        </svg>
+        <span class="app-logo-text">בית רווקים</span>
+        <span class="badge-online">
+          <span class="badge-online-dot"></span>חי
+        </span>
+      </div>
+      <div class="users-strip">
+        <div class="user-chip natan" id="chip-natan">
+          <div class="user-dot"></div>
+          <span class="user-chip-name">נתן</span>
+        </div>
+        <div class="user-chip menachem" id="chip-menachem">
+          <div class="user-dot"></div>
+          <span class="user-chip-name">מנחם</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="totals-row">
+      <div class="total-box urgent">
+        <div class="total-box-label">דחוף</div>
+        <div class="total-box-amount" id="total-urgent"><span class="shekel">₪</span><span id="amt-urgent">0</span></div>
+      </div>
+      <div class="total-box wish">
+        <div class="total-box-label">רצונות</div>
+        <div class="total-box-amount" id="total-wish"><span class="shekel">₪</span><span id="amt-wish">0</span></div>
+      </div>
+      <div class="total-box all">
+        <div class="total-box-label">סה״כ</div>
+        <div class="total-box-amount"><span class="shekel">₪</span><span id="amt-total">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn urgent-tab active" onclick="switchTab('urgent')">
+      <span class="tab-count" id="count-urgent">0</span>דחוף
+    </button>
+    <button class="tab-btn wish-tab" onclick="switchTab('wish')">
+      <span class="tab-count" id="count-wish">0</span>רצונות
+    </button>
+  </div>
+
+  <!-- CLEAN BOUGHT -->
+  <button class="clean-btn" id="clean-btn" onclick="confirmCleanBought()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M2 3.5 L12 3.5 M5 3.5 L5 2 L9 2 L9 3.5 M3 3.5 L3 12 Q3 13 4 13 L10 13 Q11 13 11 12 L11 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    נקה שנקנו
+  </button>
+
+  <!-- LIST AREA -->
+  <div class="list-area" id="list-area"></div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="openAddSheet()">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M10 4 L10 16 M4 10 L16 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    הוספת פריט
+  </button>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+
+<!-- ADD SHEET -->
+<div class="sheet" id="add-sheet">
+  <div class="sheet-handle"></div>
+
+  <!-- STEP 1: URGENCY -->
+  <div id="step1">
+    <div class="steps">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="sheet-title">כמה זה דחוף?</div>
+    <div class="choice-grid">
+      <div class="choice-card urgent-opt" onclick="selectUrgency('urgent')">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="14" stroke="#ff6b6b" stroke-width="1.5" opacity="0.4"/>
+          <path d="M18 9 L18 20" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="18" cy="25" r="2" fill="#ff6b6b"/>
+        </svg>
+        <div class="choice-card-label" style="color:#ff6b6b">דחוף</div>
+        <div class="choice-card-sub">צריך את זה עכשיו</div>
+      </div>
+      <div class="choice-card wish-opt" onclick="selectUrgency('wish')">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="14" stroke="#a78bfa" stroke-width="1.5" opacity="0.4"/>
+          <path d="M18 10 L20.5 15 L26 15.8 L22 19.6 L23 25 L18 22.3 L13 25 L14 19.6 L10 15.8 L15.5 15 Z" stroke="#a78bfa" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <div class="choice-card-label" style="color:#a78bfa">רצון</div>
+        <div class="choice-card-sub">יהיה נחמד שיהיה</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: CATEGORY -->
+  <div id="step2" style="display:none">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="sheet-title">איזו קטגוריה?</div>
+    <div class="cat-grid" id="cat-grid"></div>
+    <button class="sheet-next-btn" id="next-cat-btn" onclick="goStep(3)" disabled style="margin-top:16px">המשך</button>
+  </div>
+
+  <!-- STEP 3: NAME -->
+  <div id="step3" style="display:none">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="sheet-title">מה שם הפריט?</div>
+    <input type="text" class="input-field" id="item-name-input" placeholder="נגיד... כרית, סיר, מטאטא..." oninput="checkNameInput()">
+    <button class="sheet-next-btn" id="next-name-btn" onclick="goStep(4)" disabled>הוסף מחיר</button>
+  </div>
+
+  <!-- STEP 4: PRICE -->
+  <div id="step4" style="display:none">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+    </div>
+    <div class="sheet-title">כמה זה בערך עולה?</div>
+
+    <div class="numpad-display">
+      <div class="numpad-shekel-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <text x="3" y="17" font-family="Heebo" font-size="16" font-weight="800" fill="#00d4aa">₪</text>
+        </svg>
+      </div>
+      <div class="numpad-display-val" id="price-display">0</div>
+    </div>
+
+    <div class="numpad" id="numpad">
+      <button class="numpad-btn" onclick="numpadPress('1')">1</button>
+      <button class="numpad-btn" onclick="numpadPress('2')">2</button>
+      <button class="numpad-btn" onclick="numpadPress('3')">3</button>
+      <button class="numpad-btn" onclick="numpadPress('4')">4</button>
+      <button class="numpad-btn" onclick="numpadPress('5')">5</button>
+      <button class="numpad-btn" onclick="numpadPress('6')">6</button>
+      <button class="numpad-btn" onclick="numpadPress('7')">7</button>
+      <button class="numpad-btn" onclick="numpadPress('8')">8</button>
+      <button class="numpad-btn" onclick="numpadPress('9')">9</button>
+      <button class="numpad-btn zero" onclick="numpadPress('0')">0</button>
+      <button class="numpad-btn del" onclick="numpadDel()">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M7 4 L2 10 L7 16 L18 16 L18 4 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M12 7.5 L15.5 12.5 M15.5 7.5 L12 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <button class="skip-price-btn" onclick="skipPrice()">לא יודע כמה זה עולה</button>
+    <button class="sheet-next-btn" onclick="saveItem()">שמור פריט</button>
+  </div>
+</div>
+
+<!-- EDIT SHEET -->
+<div class="sheet" id="edit-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">עריכת פריט</div>
+  <span class="section-label">שם הפריט</span>
+  <input type="text" class="input-field" id="edit-name-input" placeholder="שם הפריט">
+  <span class="section-label">מחיר משוער</span>
+  <div class="numpad-display" style="margin-bottom:12px">
+    <div class="numpad-shekel-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <text x="3" y="17" font-family="Heebo" font-size="16" font-weight="800" fill="#00d4aa">₪</text>
+      </svg>
+    </div>
+    <div class="numpad-display-val" id="edit-price-display">0</div>
+  </div>
+  <div class="numpad">
+    <button class="numpad-btn" onclick="editNumpadPress('1')">1</button>
+    <button class="numpad-btn" onclick="editNumpadPress('2')">2</button>
+    <button class="numpad-btn" onclick="editNumpadPress('3')">3</button>
+    <button class="numpad-btn" onclick="editNumpadPress('4')">4</button>
+    <button class="numpad-btn" onclick="editNumpadPress('5')">5</button>
+    <button class="numpad-btn" onclick="editNumpadPress('6')">6</button>
+    <button class="numpad-btn" onclick="editNumpadPress('7')">7</button>
+    <button class="numpad-btn" onclick="editNumpadPress('8')">8</button>
+    <button class="numpad-btn" onclick="editNumpadPress('9')">9</button>
+    <button class="numpad-btn zero" onclick="editNumpadPress('0')">0</button>
+    <button class="numpad-btn del" onclick="editNumpadDel()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M7 4 L2 10 L7 16 L18 16 L18 4 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M12 7.5 L15.5 12.5 M15.5 7.5 L12 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <button class="skip-price-btn" onclick="editSkipPrice()">לא יודע כמה זה עולה</button>
+  <button class="sheet-next-btn" onclick="saveEdit()">שמור שינויים</button>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-dialog" id="confirm-dialog">
+  <div class="confirm-box">
+    <div class="confirm-box-icon" id="confirm-icon"></div>
+    <div class="confirm-box-title" id="confirm-title">בטוח?</div>
+    <div class="confirm-box-body" id="confirm-body">פעולה זו לא ניתנת לביטול.</div>
+    <div class="confirm-actions">
+      <button class="confirm-btn cancel" onclick="closeConfirm()">ביטול</button>
+      <button class="confirm-btn danger" id="confirm-ok-btn">מחק</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAwMe9tJQaYqB0B1gu9nW93xuX1W92dKzw",
+  authDomain: "dirat-ravakim.firebaseapp.com",
+  databaseURL: "https://dirat-ravakim-default-rtdb.firebaseio.com/",
+  projectId: "dirat-ravakim",
+  storageBucket: "dirat-ravakim.firebasestorage.app",
+  messagingSenderId: "632784202093",
+  appId: "1:632784202093:web:69a4bcb9e81ab494875264"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ---- STATE ----
+let currentUser = null;
+let currentTab = 'urgent';
+let items = {};
+let addState = { urgency: null, category: null, name: '', price: null, priceStr: '0' };
+let editState = { id: null, priceStr: '0' };
+let confirmCallback = null;
+let onlineUsers = {};
+
+const USERS = {
+  natan: { label: 'נתן', color: '#00d4aa' },
+  menachem: { label: 'מנחם', color: '#a78bfa' }
+};
+
+const CATEGORIES = [
+  { id: 'kitchen', label: 'מטבח', color: '#f59e0b', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 7 Q4 4 7 4 L15 4 Q18 4 18 7 L18 18 Q18 19 17 19 L5 19 Q4 19 4 18 Z" stroke="#f59e0b" stroke-width="1.5"/><path d="M8 4 L8 8 M11 4 L11 8 M14 4 L14 8" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg>` },
+  { id: 'bedroom', label: 'חדר שינה', color: '#60a5fa', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="10" width="16" height="9" rx="2" stroke="#60a5fa" stroke-width="1.5"/><path d="M3 10 L3 7 Q3 5 5 5 L17 5 Q19 5 19 7 L19 10" stroke="#60a5fa" stroke-width="1.5"/><rect x="6" y="13" width="4" height="3" rx="1" fill="#60a5fa" opacity="0.3" stroke="#60a5fa" stroke-width="1"/><rect x="12" y="13" width="4" height="3" rx="1" fill="#60a5fa" opacity="0.3" stroke="#60a5fa" stroke-width="1"/></svg>` },
+  { id: 'bathroom', label: 'אמבטיה', color: '#22d3ee', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 12 L18 12 Q18 18 11 18 Q4 18 4 12 Z" stroke="#22d3ee" stroke-width="1.5"/><path d="M7 12 L7 6 Q7 4 9 4 L9 6" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"/><path d="M4 12 L4 11 L18 11 L18 12" stroke="#22d3ee" stroke-width="1"/></svg>` },
+  { id: 'living', label: 'סלון', color: '#34d399', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="10" width="18" height="8" rx="3" stroke="#34d399" stroke-width="1.5"/><rect x="5" y="14" width="5" height="5" rx="1" stroke="#34d399" stroke-width="1.2"/><rect x="12" y="14" width="5" height="5" rx="1" stroke="#34d399" stroke-width="1.2"/><path d="M5 10 L5 7 Q5 5 11 5 Q17 5 17 7 L17 10" stroke="#34d399" stroke-width="1.5"/></svg>` },
+  { id: 'cleaning', label: 'ניקיון', color: '#a3e635', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3 L11 14" stroke="#a3e635" stroke-width="2" stroke-linecap="round"/><path d="M8 14 L14 14 Q16 14 16 17 L6 17 Q6 14 8 14 Z" stroke="#a3e635" stroke-width="1.5"/><path d="M9 6 Q11 4 13 6" stroke="#a3e635" stroke-width="1.5" stroke-linecap="round"/></svg>` },
+  { id: 'food', label: 'אוכל', color: '#fb923c', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M8 3 L8 9 Q8 12 11 12 Q14 12 14 9 L14 3" stroke="#fb923c" stroke-width="1.5" stroke-linecap="round"/><path d="M11 12 L11 19" stroke="#fb923c" stroke-width="1.5" stroke-linecap="round"/><path d="M5 3 L5 7 Q5 9 7 9" stroke="#fb923c" stroke-width="1.5" stroke-linecap="round"/></svg>` },
+  { id: 'tech', label: 'טכנולוגיה', color: '#818cf8', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="11" rx="2" stroke="#818cf8" stroke-width="1.5"/><path d="M8 19 L14 19 M11 16 L11 19" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="10.5" r="2.5" stroke="#818cf8" stroke-width="1.2"/></svg>` },
+  { id: 'outdoor', label: 'חוץ', color: '#4ade80', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 19 L11 5 L18 19 Z" stroke="#4ade80" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 14 L15 14" stroke="#4ade80" stroke-width="1.2"/></svg>` },
+  { id: 'other', label: 'אחר', color: '#94a3b8', svg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#94a3b8" stroke-width="1.5"/><path d="M11 7 Q11 5 13 6 Q15 7 13 9 Q12 10 11 10 L11 12" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="15" r="1.2" fill="#94a3b8"/></svg>` }
+];
+
+// ---- UTILS ----
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function animateNumber(el, newVal) {
+  el.classList.remove('count-anim');
+  void el.offsetWidth;
+  el.textContent = newVal.toLocaleString('he-IL');
+  el.classList.add('count-anim');
+}
+
+// ---- ONLINE PRESENCE ----
+function setOnline(user) {
+  set(ref(db, `online/${user}`), true);
+  window.addEventListener('beforeunload', () => set(ref(db, `online/${user}`), false));
+}
+
+function listenOnline() {
+  onValue(ref(db, 'online'), snap => {
+    onlineUsers = snap.val() || {};
+    Object.keys(USERS).forEach(u => {
+      const chip = document.getElementById(`chip-${u}`);
+      if (!chip) return;
+      if (onlineUsers[u]) {
+        chip.style.opacity = '1';
+      } else {
+        chip.style.opacity = '0.35';
+      }
+    });
+  });
+}
+
+// ---- USER SELECTION ----
+window.selectUser = async function(user) {
+  // check if taken by other session
+  const snap = await new Promise(res => {
+    const r = ref(db, `online/${user}`);
+    onValue(r, snap => res(snap), { onlyOnce: true });
+  });
+
+  if (snap.val() === true && user !== currentUser) {
+    const err = document.getElementById('error-msg');
+    err.classList.add('show');
+    setTimeout(() => err.classList.remove('show'), 3000);
+    return;
+  }
+
+  // Also check if both are taken
+  const onlineSnap = await new Promise(res => {
+    onValue(ref(db, 'online'), s => res(s), { onlyOnce: true });
+  });
+  const online = onlineSnap.val() || {};
+  const otherUser = user === 'natan' ? 'menachem' : 'natan';
+  if (online[otherUser] === true && online[user] === true) {
+    const err = document.getElementById('error-msg');
+    err.textContent = 'האתר פרטי ובשימוש — כרגע שני המשתמשים מחוברים';
+    err.classList.add('show');
+    setTimeout(() => err.classList.remove('show'), 4000);
+    return;
+  }
+
+  currentUser = user;
+  localStorage.setItem('bayit_user', user);
+  setOnline(user);
+  showGreeting(user);
+};
+
+function showGreeting(user) {
+  document.getElementById('greeting-name').textContent = USERS[user].label;
+  switchScreen('welcome-screen', 'greeting-screen');
+}
+
+window.goToApp = function() {
+  switchScreen('greeting-screen', 'app-screen');
+  initApp();
+};
+
+// ---- SCREENS ----
+function switchScreen(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to = document.getElementById(toId);
+  from.classList.add('exit');
+  setTimeout(() => {
+    from.classList.remove('active', 'exit');
+    to.classList.add('active');
+  }, 400);
+}
+
+// ---- APP INIT ----
+function initApp() {
+  // mark current user chip
+  document.getElementById(`chip-${currentUser}`).classList.add('me');
+  listenOnline();
+  listenItems();
+  buildCatGrid();
+}
+
+function listenItems() {
+  onValue(ref(db, 'items'), snap => {
+    items = snap.val() || {};
+    renderList();
+    updateTotals();
+  });
+}
+
+// ---- RENDER ----
+function renderList() {
+  const area = document.getElementById('list-area');
+  const tabItems = Object.entries(items).filter(([, it]) => it.type === currentTab);
+
+  // counts
+  const urgentCount = Object.values(items).filter(i => i.type === 'urgent').length;
+  const wishCount = Object.values(items).filter(i => i.type === 'wish').length;
+  document.getElementById('count-urgent').textContent = urgentCount;
+  document.getElementById('count-wish').textContent = wishCount;
+
+  if (tabItems.length === 0) {
+    area.innerHTML = `<div class="empty-state">
+      ${currentTab === 'urgent' ?
+        `<svg width="64" height="64" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="#2a2a38" stroke-width="2"/><path d="M32 18 L32 36" stroke="#2a2a38" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="44" r="3" fill="#2a2a38"/></svg>` :
+        `<svg width="64" height="64" viewBox="0 0 64 64" fill="none"><path d="M32 14 L36 24 L48 25 L39 34 L41 46 L32 41 L23 46 L25 34 L16 25 L28 24 Z" stroke="#2a2a38" stroke-width="2" stroke-linejoin="round"/></svg>`
+      }
+      <div class="empty-state-title">הרשימה ריקה</div>
+      <div class="empty-state-sub">לחץ על + הוספת פריט<br>ותתחיל לרשום</div>
+    </div>`;
+    return;
+  }
+
+  // group by category
+  const grouped = {};
+  tabItems.forEach(([id, it]) => {
+    if (!grouped[it.category]) grouped[it.category] = [];
+    grouped[it.category].push([id, it]);
+  });
+
+  let html = '';
+  for (const [catId, catItems] of Object.entries(grouped)) {
+    const cat = CATEGORIES.find(c => c.id === catId) || CATEGORIES[CATEGORIES.length - 1];
+    html += `<div class="cat-group">
+      <div class="cat-header">
+        <div class="cat-icon-wrap" style="background:${cat.color}22">${cat.svg}</div>
+        <span class="cat-label">${cat.label}</span>
+        <span class="cat-count">${catItems.length}</span>
+      </div>`;
+
+    catItems.sort((a, b) => (a[1].bought ? 1 : 0) - (b[1].bought ? 1 : 0));
+    catItems.forEach(([id, it]) => {
+      const ownerColor = it.owner === 'natan' ? 'natan' : 'menachem';
+      const priceHtml = it.price === null
+        ? `<span class="item-price unknown">מחיר לא ידוע</span>`
+        : `<span class="item-price">₪${Number(it.price).toLocaleString('he-IL')}</span>`;
+
+      html += `<div class="item-card ${it.bought ? 'bought' : ''}" id="card-${id}">
+        <div class="item-check" onclick="toggleBought('${id}')">
+          ${it.bought ? `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6 L5 9 L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+        </div>
+        <div class="item-body">
+          <div class="item-name">${it.name}</div>
+          <div class="item-meta">
+            <div class="item-owner-dot ${ownerColor}"></div>
+            <span style="font-size:11px;color:var(--text3)">${USERS[it.owner]?.label || it.owner}</span>
+            ${priceHtml}
+          </div>
+        </div>
+        <div class="item-actions">
+          <div class="item-action-btn edit" onclick="openEdit('${id}')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10 L2 12 L4 12 L11 5 L9 3 Z" stroke="#9898aa" stroke-width="1.3" stroke-linejoin="round"/><path d="M9 3 L11 5 L10 6 L8 4 Z" fill="#9898aa"/></svg>
+          </div>
+          <div class="item-action-btn delete" onclick="confirmDelete('${id}')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5 L12 3.5 M4.5 3.5 L4.5 2 L9.5 2 L9.5 3.5 M3.5 3.5 L3.5 12 Q3.5 12.5 4 12.5 L10 12.5 Q10.5 12.5 10.5 12 L10.5 3.5" stroke="#ff6b6b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>`;
+    });
+
+    html += '</div>';
+  }
+
+  area.innerHTML = html;
+}
+
+function updateTotals() {
+  let urgent = 0, wish = 0;
+  Object.values(items).forEach(it => {
+    if (it.bought || it.price === null) return;
+    const p = Number(it.price);
+    if (it.type === 'urgent') urgent += p;
+    else wish += p;
+  });
+  const total = urgent + wish;
+
+  animateNumber(document.getElementById('amt-urgent'), urgent);
+  animateNumber(document.getElementById('amt-wish'), wish);
+  animateNumber(document.getElementById('amt-total'), total);
+}
+
+// ---- TAB ----
+window.switchTab = function(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.${tab}-tab`).classList.add('active');
+  renderList();
+};
+
+// ---- ADD FLOW ----
+window.openAddSheet = function() {
+  addState = { urgency: null, category: null, name: '', price: null, priceStr: '0' };
+  goStep(1);
+  document.getElementById('item-name-input').value = '';
+  document.getElementById('price-display').textContent = '0';
+  showSheet('add-sheet');
+};
+
+window.selectUrgency = function(type) {
+  addState.urgency = type;
+  document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.${type}-opt`).classList.add('selected');
+  setTimeout(() => goStep(2), 200);
+};
+
+window.goStep = function(n) {
+  [1, 2, 3, 4].forEach(i => {
+    document.getElementById(`step${i}`).style.display = i === n ? 'block' : 'none';
+  });
+};
+
+function buildCatGrid() {
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = CATEGORIES.map(cat => `
+    <div class="cat-opt" onclick="selectCat('${cat.id}')" id="catopt-${cat.id}">
+      <div style="width:36px;height:36px;border-radius:10px;background:${cat.color}22;display:flex;align-items:center;justify-content:center">${cat.svg}</div>
+      <div class="cat-opt-label">${cat.label}</div>
+    </div>
+  `).join('');
+}
+
+window.selectCat = function(id) {
+  addState.category = id;
+  document.querySelectorAll('.cat-opt').forEach(c => c.classList.remove('selected'));
+  document.getElementById(`catopt-${id}`).classList.add('selected');
+  document.getElementById('next-cat-btn').disabled = false;
+};
+
+window.checkNameInput = function() {
+  const val = document.getElementById('item-name-input').value.trim();
+  document.getElementById('next-name-btn').disabled = val.length < 1;
+  addState.name = val;
+};
+
+// NUMPAD
+window.numpadPress = function(d) {
+  if (addState.priceStr === '0') addState.priceStr = d;
+  else addState.priceStr += d;
+  if (addState.priceStr.length > 7) addState.priceStr = addState.priceStr.slice(0, 7);
+  document.getElementById('price-display').textContent = Number(addState.priceStr).toLocaleString('he-IL');
+};
+
+window.numpadDel = function() {
+  addState.priceStr = addState.priceStr.slice(0, -1) || '0';
+  document.getElementById('price-display').textContent = Number(addState.priceStr).toLocaleString('he-IL');
+};
+
+window.skipPrice = function() {
+  addState.price = null;
+  saveItem();
+};
+
+window.saveItem = function() {
+  const price = addState.price === null ? null : (addState.priceStr === '0' ? null : Number(addState.priceStr));
+  const item = {
+    name: addState.name,
+    type: addState.urgency,
+    category: addState.category,
+    price: price,
+    owner: currentUser,
+    bought: false,
+    createdAt: Date.now()
+  };
+  const id = uid();
+  set(ref(db, `items/${id}`), item);
+  closeSheet();
+  if (currentTab !== addState.urgency) switchTab(addState.urgency);
+};
+
+// ---- EDIT ----
+window.openEdit = function(id) {
+  const it = items[id];
+  if (!it) return;
+  editState.id = id;
+  editState.priceStr = it.price !== null ? String(it.price) : '0';
+  document.getElementById('edit-name-input').value = it.name;
+  document.getElementById('edit-price-display').textContent = it.price !== null ? Number(it.price).toLocaleString('he-IL') : '0';
+  showSheet('edit-sheet');
+};
+
+window.editNumpadPress = function(d) {
+  if (editState.priceStr === '0') editState.priceStr = d;
+  else editState.priceStr += d;
+  if (editState.priceStr.length > 7) editState.priceStr = editState.priceStr.slice(0, 7);
+  document.getElementById('edit-price-display').textContent = Number(editState.priceStr).toLocaleString('he-IL');
+};
+
+window.editNumpadDel = function() {
+  editState.priceStr = editState.priceStr.slice(0, -1) || '0';
+  document.getElementById('edit-price-display').textContent = Number(editState.priceStr).toLocaleString('he-IL');
+};
+
+window.editSkipPrice = function() {
+  editState.priceStr = '0';
+  document.getElementById('edit-price-display').textContent = '0';
+  update(ref(db, `items/${editState.id}`), { price: null });
+  const nameVal = document.getElementById('edit-name-input').value.trim();
+  if (nameVal) update(ref(db, `items/${editState.id}`), { name: nameVal });
+  closeSheet();
+};
+
+window.saveEdit = function() {
+  const nameVal = document.getElementById('edit-name-input').value.trim();
+  const price = editState.priceStr === '0' ? null : Number(editState.priceStr);
+  const updates = {};
+  if (nameVal) updates.name = nameVal;
+  updates.price = price;
+  update(ref(db, `items/${editState.id}`), updates);
+  closeSheet();
+};
+
+// ---- TOGGLE BOUGHT ----
+window.toggleBought = function(id) {
+  const it = items[id];
+  if (!it) return;
+  update(ref(db, `items/${id}`), { bought: !it.bought });
+};
+
+// ---- DELETE ----
+window.confirmDelete = function(id) {
+  const it = items[id];
+  showConfirm(
+    `<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="rgba(255,107,107,0.1)" stroke="rgba(255,107,107,0.3)" stroke-width="1.5"/><path d="M12 13 L28 13 M16 13 L16 10 L24 10 L24 13 M14 13 L14 30 Q14 31 15 31 L25 31 Q26 31 26 30 L26 13" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    `למחוק "${it?.name}"?`,
+    'פריט שנמחק לא ניתן לשחזור.',
+    () => { remove(ref(db, `items/${id}`)); }
+  );
+};
+
+window.confirmCleanBought = function() {
+  const boughtItems = Object.entries(items).filter(([, it]) => it.bought);
+  if (boughtItems.length === 0) return;
+  showConfirm(
+    `<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="rgba(255,107,107,0.1)" stroke="rgba(255,107,107,0.3)" stroke-width="1.5"/><path d="M12 14 L28 14 M16 14 L16 11 L24 11 L24 14 M14 14 L14 30 Q14 31 15 31 L25 31 Q26 31 26 30 L26 14 M17 19 L17 26 M20 19 L20 26 M23 19 L23 26" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    `למחוק ${boughtItems.length} פריטים שנקנו?`,
+    'כל הפריטים המסומנים כ"נקנה" יימחקו לצמיתות.',
+    () => { boughtItems.forEach(([id]) => remove(ref(db, `items/${id}`))); }
+  );
+};
+
+// ---- CONFIRM DIALOG ----
+function showConfirm(iconHtml, title, body, cb) {
+  document.getElementById('confirm-icon').innerHTML = iconHtml;
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').textContent = body;
+  confirmCallback = cb;
+  document.getElementById('confirm-ok-btn').onclick = () => { cb(); closeConfirm(); };
+  document.getElementById('confirm-dialog').classList.add('show');
+}
+
+window.closeConfirm = function() {
+  document.getElementById('confirm-dialog').classList.remove('show');
+};
+
+// ---- SHEET ----
+function showSheet(id) {
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById(id).classList.add('show');
+}
+
+window.closeSheet = function() {
+  document.getElementById('overlay').classList.remove('show');
+  document.querySelectorAll('.sheet').forEach(s => s.classList.remove('show'));
+};
+
+// ---- BOOT ----
+const savedUser = localStorage.getItem('bayit_user');
+
+// Check if saved user is already online before auto-login
+async function boot() {
+  document.getElementById('loading-screen').classList.add('hide');
+  setTimeout(() => document.getElementById('loading-screen').remove(), 500);
+
+  if (savedUser && USERS[savedUser]) {
+    // verify still valid
+    const snap = await new Promise(res => {
+      onValue(ref(db, `online/${savedUser}`), s => res(s), { onlyOnce: true });
+    });
+    if (!snap.val()) {
+      currentUser = savedUser;
+      setOnline(savedUser);
+      showGreeting(savedUser);
+    } else {
+      document.getElementById('welcome-screen').classList.add('active');
+    }
+  } else {
+    document.getElementById('welcome-screen').classList.add('active');
+  }
+}
+
+boot();
+</script>
+
+</body>
+</html>
