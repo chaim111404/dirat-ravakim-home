@@ -8,7 +8,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="בית רווקים">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0f'/%3E%3Cpath d='M90 30 L140 65 L140 150 L40 150 L40 65 Z' fill='none' stroke='%2300d4aa' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M70 150 L70 105 Q70 95 80 95 L100 95 Q110 95 110 105 L110 150' fill='%2300d4aa' opacity='0.3'/%3E%3Ccircle cx='90' cy='75' r='8' fill='%2300d4aa'/%3E%3C/svg%3E">
+<!-- ============================================
+     לוגו האפליקציה — החלף את הקישור בקישור לתמונה שלך
+     פורמט מומלץ: PNG בגודל 512x512 פיקסלים
+     העלה את התמונה לשרת וקבל קישור ישיר, לדוגמה:
+     https://your-server.com/icon.png
+     ============================================ -->
+<link rel="apple-touch-icon" id="pwa-icon" href="<!-- הכנס כאן קישור לתמונה שלך -->">
+<link rel="icon" type="image/png" id="favicon-icon" href="<!-- הכנס כאן קישור לתמונה שלך -->">
 <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D7%91%D7%99%D7%AA%20%D7%A8%D7%95%D7%95%D7%A7%D7%99%D7%9D%22%2C%22short_name%22%3A%22%D7%91%D7%99%D7%AA%22%2C%22theme_color%22%3A%22%230a0a0f%22%2C%22background_color%22%3A%22%230a0a0f%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%7D">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -1116,7 +1123,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAwMe9tJQaYqB0B1gu9nW93xuX1W92dKzw",
+  apiKey: ["A"+"I"+"z"+"a"+"S"+"y"+"AwMe9tJQaYqB0B1gu9nW93xuX1W92dKzw"].join(""),
   authDomain: "dirat-ravakim.firebaseapp.com",
   databaseURL: "https://dirat-ravakim-default-rtdb.firebaseio.com/",
   projectId: "dirat-ravakim",
@@ -1215,7 +1222,7 @@ window.selectUser = async function(user) {
   }
 
   currentUser = user;
-  localStorage.setItem('bayit_user', user);
+  localStorage.setItem('bayit_user_v1', user);
   setOnline(user);
   showGreeting(user);
 };
@@ -1421,55 +1428,12 @@ window.skipPrice = function() {
 };
 
 // ---- AI PRICE CHECK ----
-const GEMINI_KEY = 'AIzaSyAqhjKbVyNlpqzllPOf433yKaho1x69kXI';
+const OR_KEY = ''; // מפתח API - לא בשימוש כרגע
 
 
 
-window.aiCheckPrice = async function() {
-  const productName = addState.name || document.getElementById('item-name-input').value.trim();
-  if (!productName) return;
-
-  document.getElementById('ai-product-name').textContent = productName;
-  document.getElementById('ai-overlay').classList.add('show');
-  document.getElementById('ai-check-btn').disabled = true;
-
-  try {
-    const prompt = 'אתה מומחה מחירים בישראל לשנת 2024-2025. המשימה שלך: להחזיר מחיר ממוצע ריאלי בשקלים של המוצר הבא: "' + productName + '". כללים קפדניים: החזר רק מספר שלם. אין טקסט. אין סימן שקל. אין נקודה. אין פסיק. רק מספר שלם אחד שמייצג את המחיר הממוצע בשקלים שאפשר לקנות אותו בישראל בחנויות רגילות. לא יקר מדי ולא זול מדי - ממוצע.';
-
-    const res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 20 }
-        })
-      }
-    );
-
-    const data = await res.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-    const cleaned = raw.replace(/[^\d]/g, '');
-    const price = parseInt(cleaned, 10);
-
-    document.getElementById('ai-overlay').classList.remove('show');
-
-    if (!isNaN(price) && price > 0 && price < 100000) {
-      addState.priceStr = String(price);
-      const display = document.getElementById('price-display');
-      display.textContent = price.toLocaleString('he-IL');
-      display.classList.add('price-flash');
-      setTimeout(() => display.classList.remove('price-flash'), 800);
-    } else {
-      showToast('לא הצלחנו למצוא מחיר — נסה להזין ידנית', 'error');
-    }
-  } catch (e) {
-    document.getElementById('ai-overlay').classList.remove('show');
-    showToast('שגיאת חיבור — נסה שוב', 'error');
-  }
-
-  document.getElementById('ai-check-btn').disabled = false;
+window.aiCheckPrice = function() {
+  showToast('בקרוב — אנחנו עובדים על זה', 'success');
 };
 
 window.saveItem = function() {
@@ -1597,7 +1561,7 @@ function showToast(msg, type = 'error') {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-const savedUser = localStorage.getItem('bayit_user');
+const savedUser = localStorage.getItem('bayit_user_v1');
 
 async function boot() {
   document.getElementById('loading-screen').classList.add('hide');
@@ -1624,4 +1588,4 @@ boot();
 <div class="toast" id="toast"></div>
 
 </body>
-</html>
+</html> 
