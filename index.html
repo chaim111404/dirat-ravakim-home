@@ -1384,7 +1384,7 @@
 <!-- FIREBASE SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, remove, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, remove, update, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: ["A"+"I"+"z"+"a"+"S"+"y"+"AwMe9tJQaYqB0B1gu9nW93xuX1W92dKzw"].join(""),
@@ -1439,17 +1439,18 @@ function animateNumber(el, newVal) {
 function setOnline(user) {
   const userRef = ref(db, 'online/' + user);
   const now = Date.now();
+  // Set online with current timestamp
   set(userRef, { online: true, lastSeen: now, since: now });
-  // Firebase detects disconnect automatically (tab close, network drop)
-  onDisconnect(userRef).set({ online: false, lastSeen: Date.now(), since: now });
-  // Extra safety on page unload
+  // onDisconnect uses serverTimestamp - set by Firebase server AT disconnect time
+  onDisconnect(userRef).set({ online: false, lastSeen: serverTimestamp(), since: now });
+  // Extra safety on page unload - try to write exact time
   window.addEventListener('beforeunload', () => {
-    set(userRef, { online: false, lastSeen: Date.now(), since: now });
+    set(userRef, { online: false, lastSeen: serverTimestamp(), since: now });
   });
 }
 
 function formatLastSeen(ts) {
-  if (!ts) return 'לא מחובר';
+  if (!ts || ts === 0) return 'לא ידוע';
   const now = Date.now();
   const diff = now - ts;
   const mins = Math.floor(diff / 60000);
@@ -1483,7 +1484,11 @@ function listenOnline() {
           statusEl.textContent = sinceStr ? 'מחובר מ-' + sinceStr : 'מחובר';
         } else {
           const lastSeen = data && data.lastSeen;
-          statusEl.textContent = lastSeen ? 'נראה ' + formatLastSeen(lastSeen) : 'לא מחובר';
+          if (lastSeen && lastSeen > 0) {
+            statusEl.textContent = 'נראה ' + formatLastSeen(lastSeen);
+          } else {
+            statusEl.textContent = 'לא מחובר';
+          }
         }
       }
     });
